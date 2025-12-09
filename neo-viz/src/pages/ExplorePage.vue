@@ -28,7 +28,7 @@
       <h2>2. Upload Neoantigen Aggregated Report</h2>
       <p class="comment">Choose <b>all_epitopes.aggregated.tsv</b> file</p>
 
-      <input type="file" accept=".tsv" @change="file1 = $event.target.files[0]" />
+      <input type="file" accept=".tsv" @change="handleFile1Change" />
     </section>
 
     <section v-if="mode === 'one'" class="step">
@@ -61,6 +61,11 @@ import { RouterLink } from 'vue-router'
 import { useDataStore } from '@/stores/dataStore'
 
 const store = useDataStore()
+function handleFile1Change(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0] ?? null
+  file1.value = file
+  if (file) store.oneAggregatedTsv = file
+}
 
 const mode = ref<'one' | 'cohort' | null>(null)
 const file1 = ref<File | null>(null)
