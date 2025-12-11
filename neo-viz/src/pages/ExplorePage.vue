@@ -35,7 +35,7 @@
       <h2>3. Upload Neoantigen Metrics file</h2>
       <p class="comment">Choose <b>all_epitopes.aggregated.metrics.json</b> file</p>
 
-      <input type="file" accept=".json" @change="file2 = $event.target.files[0]" />
+      <input type="file" accept=".json" @change="handleFile2Change" />
     </section>
 
     <!-- SCENARIO 2: COHORT -->
@@ -61,10 +61,17 @@ import { RouterLink } from 'vue-router'
 import { useDataStore } from '@/stores/dataStore'
 
 const store = useDataStore()
+
 function handleFile1Change(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0] ?? null
   file1.value = file
   if (file) store.oneAggregatedTsv = file
+}
+
+function handleFile2Change(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0] ?? null
+  file2.value = file
+  if (file) store.oneMetricsJson = file
 }
 
 const mode = ref<'one' | 'cohort' | null>(null)
