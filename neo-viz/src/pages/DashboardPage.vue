@@ -182,6 +182,95 @@
         Next →
       </button>
     </div>
+
+    <!-- Барплоты Allele vs Tier -->
+    <div v-if="alleleVsTierData.length > 0" class="barplot-section">
+      <h2 class="barplot-title">Allele vs Tier Distribution</h2>
+
+      <div class="barplot-container">
+        <div v-for="alleleData in alleleVsTierData" :key="alleleData.allele" class="barplot-item">
+          <div class="barplot-label">{{ alleleData.allele }}</div>
+
+          <div class="barplot-bars">
+            <!-- Pass -->
+            <div
+              v-if="alleleData.counts.Pass > 0"
+              class="bar bar-pass"
+              :style="{ width: (alleleData.counts.Pass / alleleData.total * 100) + '%' }"
+              :title="`Pass: ${alleleData.counts.Pass}`"
+            >
+              <span class="bar-value">{{ alleleData.counts.Pass }}</span>
+            </div>
+
+            <!-- Subclonal -->
+            <div
+              v-if="alleleData.counts.Subclonal > 0"
+              class="bar bar-subclonal"
+              :style="{ width: (alleleData.counts.Subclonal / alleleData.total * 100) + '%' }"
+              :title="`Subclonal: ${alleleData.counts.Subclonal}`"
+            >
+              <span class="bar-value">{{ alleleData.counts.Subclonal }}</span>
+            </div>
+
+            <!-- LowExpr -->
+            <div
+              v-if="alleleData.counts.LowExpr > 0"
+              class="bar bar-lowexpr"
+              :style="{ width: (alleleData.counts.LowExpr / alleleData.total * 100) + '%' }"
+              :title="`LowExpr: ${alleleData.counts.LowExpr}`"
+            >
+              <span class="bar-value">{{ alleleData.counts.LowExpr }}</span>
+            </div>
+
+            <!-- NoExpr -->
+            <div
+              v-if="alleleData.counts.NoExpr > 0"
+              class="bar bar-noexpr"
+              :style="{ width: (alleleData.counts.NoExpr / alleleData.total * 100) + '%' }"
+              :title="`NoExpr: ${alleleData.counts.NoExpr}`"
+            >
+              <span class="bar-value">{{ alleleData.counts.NoExpr }}</span>
+            </div>
+
+            <!-- Poor -->
+            <div
+              v-if="alleleData.counts.Poor > 0"
+              class="bar bar-poor"
+              :style="{ width: (alleleData.counts.Poor / alleleData.total * 100) + '%' }"
+              :title="`Poor: ${alleleData.counts.Poor}`"
+            >
+              <span class="bar-value">{{ alleleData.counts.Poor }}</span>
+            </div>
+          </div>
+
+          <div class="barplot-total">Total: {{ alleleData.total }}</div>
+        </div>
+      </div>
+
+      <!-- Легенда -->
+      <div class="barplot-legend">
+        <div class="legend-item">
+          <div class="legend-color bar-pass"></div>
+          <span>Pass</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color bar-subclonal"></div>
+          <span>Subclonal</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color bar-lowexpr"></div>
+          <span>LowExpr</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color bar-noexpr"></div>
+          <span>NoExpr</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color bar-poor"></div>
+          <span>Poor</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -377,6 +466,42 @@ const top5Neoantigens = computed(() => {
 // Set топ-5 пептидов для выделения в основной таблице
 const top5PeptidesSet = computed(() => {
   return new Set(top5Neoantigens.value.map(item => item.peptide))
+})
+
+// Данные для барплотов Allele vs Tier
+const alleleVsTierData = computed(() => {
+  if (!allRows.value.length) return []
+
+  // Собираем данные: для каждого аллеля считаем количество каждого Tier
+  const data: Record<string, Record<string, number>> = {}
+
+  allRows.value.forEach(row => {
+    const allele = row['Allele']
+    const tier = row['Tier']
+
+    if (!allele || !tier) return
+
+    if (!data[allele]) {
+      data[allele] = {
+        'Pass': 0,
+        'Subclonal': 0,
+        'LowExpr': 0,
+        'NoExpr': 0,
+        'Poor': 0
+      }
+    }
+
+    if (data[allele][tier] !== undefined) {
+      data[allele][tier]++
+    }
+  })
+
+  // Преобразуем в массив для удобства отображения
+  return Object.keys(data).map(allele => ({
+    allele,
+    counts: data[allele],
+    total: Object.values(data[allele]).reduce((sum, count) => sum + count, 0)
+  }))
 })
 
 // Подсчёт наблюдений по Tier (динамически обновляется при фильтрации)
@@ -881,5 +1006,126 @@ function isTop5Row(row: Record<string, string>) {
   outline: none;
   border-color: #1d4ed8;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Барплоты Allele vs Tier */
+.barplot-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  border: 3px solid #6366f1;
+  border-radius: 8px;
+  background-color: #f5f3ff;
+}
+
+.barplot-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4338ca;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.barplot-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.barplot-item {
+  display: grid;
+  grid-template-columns: 150px 1fr 100px;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #c7d2fe;
+}
+
+.barplot-label {
+  font-weight: 600;
+  color: #4338ca;
+  font-size: 0.9rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+.barplot-bars {
+  display: flex;
+  height: 40px;
+  background-color: #e0e7ff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  cursor: pointer;
+  min-width: 30px;
+}
+
+.bar:hover {
+  opacity: 0.8;
+  transform: scaleY(1.05);
+}
+
+.bar-value {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Цвета для каждого Tier - совпадают с цветами в таблице */
+.bar-pass {
+  background-color: #16a34a;
+}
+
+.bar-subclonal {
+  background-color: #22c55e;
+}
+
+.bar-lowexpr {
+  background-color: #eab308;
+}
+
+.bar-noexpr {
+  background-color: #f59e0b;
+}
+
+.bar-poor {
+  background-color: #dc2626;
+}
+
+.barplot-total {
+  font-weight: 600;
+  color: #4338ca;
+  text-align: center;
+}
+
+/* Легенда */
+.barplot-legend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #c7d2fe;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #4338ca;
 }
 </style>
