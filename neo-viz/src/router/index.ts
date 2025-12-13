@@ -7,6 +7,7 @@ const routes = [
   { path: '/help', name: 'help', component: () => import('../pages/HelpPage.vue') },
   { path: '/explore', name: 'explore', component: () => import('../pages/ExplorePage.vue') },
   { path: '/dashboard', name: 'dashboard', component: () => import('../pages/DashboardPage.vue') },
+  { path: '/cohort', name: 'cohort', component: () =>import('../pages/Cohort.vue')}
 ]
 
 const router = createRouter({
