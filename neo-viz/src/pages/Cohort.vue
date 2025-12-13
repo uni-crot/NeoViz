@@ -353,6 +353,7 @@ function createCharts() {
         y: parseInt(row['total'], 10)
       }))
       .filter(point => !isNaN(point.x) && !isNaN(point.y))
+      .sort((a, b) => a.x - b.x)
 
     charts.totalTMB = new Chart(chartTotalTMB.value, {
       type: 'scatter',
@@ -362,10 +363,11 @@ function createCharts() {
           data: scatterData,
           backgroundColor: '#3b82f6',
           borderColor: '#1d4ed8',
-          showLine: true,
-          tension: 0.1,
           pointRadius: 6,
-          pointHoverRadius: 8
+          pointHoverRadius: 8,
+          showLine: true,
+          borderWidth: 2,
+          tension: 0.1
         }]
       },
       options: {
