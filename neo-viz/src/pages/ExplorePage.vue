@@ -45,13 +45,18 @@
         It is a <b>tsv file</b> containing information of all patients including TMB data.
       </p>
 
-      <input type="file" accept=".tsv" @change="file1 = $event.target.files[0]" />
+      <input type="file" accept=".tsv" @change="handleFile3Change" />
     </section>
 
-    <!-- RUN BUTTON -->
-    <div class="run-container">
-      <RouterLink to="/dashboard" class="run-btn">RUN →</RouterLink>
-    </div>
+<!-- RUN BUTTON -->
+<div class="run-container">
+  <RouterLink 
+    :to="mode === 'one' ? '/dashboard' : '/cohort'" 
+    class="run-btn"
+  >
+    RUN →
+  </RouterLink>
+</div>
   </main>
 </template>
 
@@ -74,9 +79,16 @@ function handleFile2Change(event: Event) {
   if (file) store.oneMetricsJson = file
 }
 
+function handleFile3Change(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0] ?? null
+  file3.value = file
+  if (file) store.tsvFile = file
+}
+
 const mode = ref<'one' | 'cohort' | null>(null)
 const file1 = ref<File | null>(null)
 const file2 = ref<File | null>(null)
+const file3 = ref<File | null>(null)
 </script>
 
 <style scoped>
